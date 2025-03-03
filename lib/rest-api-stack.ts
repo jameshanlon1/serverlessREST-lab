@@ -53,6 +53,19 @@ export class RestAPIStack extends cdk.Stack {
         },
       }
       );
+
+
+
+      const deleteMovieFn = new lambdanode.NodejsFunction(this, "DeleteMovieFn", {
+        architecture: lambda.Architecture.ARM_64,
+        runtime: lambda.Runtime.NODEJS_18_X,
+        entry: `${__dirname}/../lambdas/deleteMovie.ts`,
+        timeout: cdk.Duration.seconds(10),
+        memorySize: 128,
+        environment: { TABLE_NAME: moviesTable.tableName,
+                       REGION: "eu-west-1",
+         },
+      });
       
       const getAllMoviesFn = new lambdanode.NodejsFunction(
         this,
@@ -101,16 +114,7 @@ export class RestAPIStack extends cdk.Stack {
     });
 
 
-    const deleteMovieFn = new lambdanode.NodejsFunction(this, "DeleteMovieFn", {
-      runtime: lambda.Runtime.NODEJS_18_X,
-      entry: `${__dirname}/../lambdas/deleteMovie.ts`,
-      timeout: cdk.Duration.seconds(10),
-      handler: "deleteMovie.handler",
-      memorySize: 128,
-      environment: { TABLE_NAME: moviesTable.tableName,
-                     REGION: "eu-west-1",
-       },
-    });
+
 
 
     //  Functions .....
@@ -171,7 +175,7 @@ export class RestAPIStack extends cdk.Stack {
       new apig.LambdaIntegration(newMovieFn, { proxy: true })
     );
 
-    moviesEndpoint.addMethod(
+    specificMovieEndpoint.addMethod(
       "DELETE",
       new apig.LambdaIntegration(deleteMovieFn, { proxy: true })
     );
